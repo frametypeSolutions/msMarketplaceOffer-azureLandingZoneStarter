@@ -1,252 +1,260 @@
-# Forge LZ Starter — Azure Landing Zone
+<!--
+  WORKING COPY — msMarketplaceBuild-azureLandingZoneStarter
+  This is the authoritative source for all README content.
+  Promote to: msMarketplaceOffer-azureLandingZoneStarter/README.md
+  Strip before promotion: "Build Repo Conventions" section at the end of this file.
+  Last updated: 2026-05-31 | ALZ-BUILD-028
+-->
 
-*[Forge LZ Starter on Azure Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/apps?search=frametype)*
+---
+
+> **📦 Available on Microsoft Azure Marketplace**
+> [Deploy Azure Landing Zone — Foundation](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/frametypesolutions.azurelandingzone)
 
 ---
 
 <!-- consumed-by: web | field: purpose -->
-### Purpose
+## 1. Purpose
 
-This offer deploys a fully configured, CAF-aligned Azure Landing Zone into a single Azure subscription directly from the Azure Marketplace. It is designed for organizations that want a production-grade cloud foundation without the complexity of building landing zone infrastructure from scratch.
+Forge LZ Starter delivers a production-grade, CAF-aligned Azure Landing Zone into a single Azure subscription through a single guided deployment experience. No scripting required beyond the included pre-deployment script. No post-deployment cleanup. Landing zone infrastructure ready on day one.
 
-<!-- consumed-by: web | field: outcomes -->
-Key outcomes this offer delivers:
+**Six outcomes. One deployment.**
 
-1. **CAF-Aligned Foundation:** Five resource groups structured around Cloud Adoption Framework separation principles — management, networking, security, identity, and workload — with consistent naming and tagging from day one.
+1. **Five dedicated resource groups** — management, networking, security, identity, and workload — organized for clear ownership, independent RBAC, and blast radius isolation from the first deployment
+2. **Hub-spoke virtual network topology** — two peered VNets with Network Security Groups (NSGs) and route tables pre-staged for Azure Firewall integration without infrastructure replacement at Tier 2
+3. **Zero Trust controls baked in** — no public IPs on platform resources, outbound internet restricted to HTTPS, Key Vault protected with a `CanNotDelete` lock, and PIM-eligible JIT support access with MFA required at every activation
+4. **Governance from day one** — Azure Policy assignments for backup and Defender for Servers, RBAC for two customer-defined Entra ID security groups, budget alerts with configurable thresholds, and diagnostic settings routing platform telemetry to Log Analytics — all configured at deployment time, not as a follow-up task
+5. **Azure Verified Modules aligned** — the ARM JSON package is compiled from Bicep source authored in alignment with AVM standards, ensuring WAF-aligned defaults and CAF-compliant resource configuration are baked in at build time
+6. **Optional managed service access via Azure Lighthouse** — read access for monitoring and JIT Contributor access (PIM-eligible, MFA required, 8-hour maximum) scoped to the five operational resource groups; no standing write access; delegation is revocable at any time
 
-2. **Hub-Spoke Networking Ready:** A hub and spoke VNet topology with NSGs, route tables, and peering configured at deployment. The routing layer is upgrade-ready for Azure Firewall (Forge Connect, Tier 2) without replacement of existing infrastructure.
-
-3. **Zero Trust by Design:** Outbound internet traffic restricted to HTTPS only, no public IPs on platform resources, PIM-eligible JIT managed service access with MFA, and Key Vault protected with a CanNotDelete lock. See the [Zero Trust Alignment](#zero-trust-alignment) section for a full principle mapping.
-
-4. **Governance from Day One:** Azure Policy for backup and Defender for Servers, RBAC assignments for two customer-defined Entra ID groups, budget alerts, and diagnostic settings routing platform telemetry to Log Analytics — all configured at deployment time.
-
-5. **frameType Managed Service:** Azure Lighthouse delegation gives frameType Solutions read access for monitoring and JIT Contributor access (PIM-eligible, MFA required, 8-hour maximum) for support and operations — without standing access to your subscription.
+---
 
 <!-- consumed-by: web | field: scope -->
-### Scope
+## 2. Scope
 
-This offer deploys a single-subscription Tier 1 Azure Landing Zone with a hub-spoke network topology. It is designed for organizations deploying into a new or dedicated Azure subscription and is intended to be extended to production workloads.
+**What this offer deploys:**
 
-**Not included in Tier 1:**
-- Azure Firewall (available in Forge Connect, Tier 2)
-- Management Group hierarchy (recommended pre-deployment configuration — see pre-deployment guidance)
-- VPN Gateway or ExpressRoute connectivity
-- Private DNS zones for PaaS services (Tier 2+)
-- NSG flow logs (Tier 2+)
-- Hybrid identity or domain join
+- Five Azure resource groups with consistent tagging
+- Hub virtual network with `AzureFirewallSubnet`, `GatewaySubnet`, management subnet, and workload subnet
+- Spoke virtual network peered to the hub
+- Network Security Groups (NSGs) per subnet, with outbound internet restricted to HTTPS
+- Route tables with RFC1918 summary routes pre-staged for Azure Firewall
+- Log Analytics Workspace with diagnostic settings for all platform resources
+- Automation Account linked to Log Analytics
+- Azure Update Manager maintenance configuration targeting the workload resource group
+- Recovery Services Vault with a default VM backup policy
+- Azure Key Vault with `CanNotDelete` resource lock and diagnostic settings
+- Microsoft Defender for Cloud — Basic (free) by default; Standard or Enhanced selectable at deployment
+- Azure Security Benchmark policy assignment (subscription scope)
+- Defender for Servers granular pricing policy (workload resource group scope, conditional on Defender tier)
+- Backup DINE policy targeting the workload resource group
+- RBAC assignments for two customer-supplied Entra ID security groups (six assignments across five resource groups)
+- Resource tags on all resource groups (`environment`, `owner`, `costCenter`)
+- Monthly budget alert with configurable threshold and email notification
+- Azure Lighthouse delegation to frameType Solutions (five resource group delegations)
+
+**What this offer does not include:**
+
+- Management Group hierarchy — Tier 1 deploys into a single subscription; MG structure is a prerequisite, not deployed by this offer (see Prerequisites)
+- Azure Firewall — included in Forge LZ Connect (Tier 2)
+- VPN Gateway or ExpressRoute Gateway — not deployed at Tier 1
+- Azure Bastion — not included; customers may add independently
+- Private DNS Zones — not deployed at Tier 1; added at Tier 2 with Private Endpoint integration
+- Virtual machines or workload resources — this offer deploys platform infrastructure only; workload deployment is the customer's responsibility
+- Active Directory Domain Services or Entra Domain Services — `rg-alz-identity` is a placeholder; DS deployment is a customer decision
 
 ---
 
-## Table of Contents
+## 3. Table of Contents
 
-- [Overview](#overview)
-- [Azure Pricing](#azure-pricing)
-- [Prerequisites](#prerequisites)
-- [Deployment Steps](#deployment-steps)
-- [Post-Deployment Verification](#post-deployment-verification)
-- [Zero Trust Alignment](#zero-trust-alignment)
-- [Azure Governance](#azure-governance)
-- [Naming Conventions](#naming-conventions)
-- [Identity and RBAC](#identity-and-rbac)
-- [Managed Service Access](#managed-service-access)
-- [Troubleshooting](#troubleshooting)
-- [Upgrade Path](#upgrade-path)
-- [Conclusion](#conclusion)
-- [References](#references)
+- [1. Purpose](#1-purpose)
+- [2. Scope](#2-scope)
+- [3. Table of Contents](#3-table-of-contents)
+- [4. Overview](#4-overview)
+- [5. Azure Pricing](#5-azure-pricing)
+- [6. Prerequisites](#6-prerequisites)
+- [7. Deployment Steps](#7-deployment-steps)
+- [8. Post-Deployment Verification](#8-post-deployment-verification)
+- [9. Zero Trust Alignment](#9-zero-trust-alignment)
+- [10. Azure Governance](#10-azure-governance)
+- [11. Naming Conventions](#11-naming-conventions)
+- [12. Identity and RBAC](#12-identity-and-rbac)
+- [13. Managed Service Access](#13-managed-service-access)
+- [14. Troubleshooting](#14-troubleshooting)
+- [15. Upgrade Path](#15-upgrade-path)
+- [16. Conclusion](#16-conclusion)
+- [17. References](#17-references)
 
 ---
 
-## Overview
+## 4. Overview
 
-### Architecture Overview
+> **Architecture diagram placeholder** — replace with final diagram before promotion to public repo.
+> File: `docs/architecture-alz-foundation.png`
 
-*Architecture diagram — coming at release.*
+Forge LZ Starter organizes landing zone resources across five resource groups. The hub-spoke networking topology isolates platform infrastructure from workloads while enabling peered connectivity. All platform resources route telemetry to a central Log Analytics Workspace from deployment.
 
-### Components
+### Deployment Layers
 
-All resources are provisioned into the managed resource group and its five child resource groups.
-
-| Resource | Type | Resource Group |
+| Layer | Purpose | Key resources |
 |---|---|---|
-| `law-alz-{env}-{region}-01` | Log Analytics Workspace | `rg-alz-management` |
-| `aa-alz-{env}-{region}-01` | Automation Account | `rg-alz-management` |
-| `mc-alz-{env}-{region}-01` | Maintenance Configuration | `rg-alz-management` |
-| `rsv-alz-{env}-{region}-01` | Recovery Services Vault | `rg-alz-management` |
-| `bvault-alz-{env}-{region}-01` | Backup Vault | `rg-alz-management` |
-| `budget-alz-{env}-{region}-01` | Cost Management Budget | `rg-alz-management` |
-| `vnet-alz-hub-{env}-{region}-01` | Virtual Network (hub) | `rg-alz-networking` |
-| `vnet-alz-spoke-{env}-{region}-01` | Virtual Network (spoke) | `rg-alz-networking` |
-| `nsg-alz-{env}-{region}-01` | Network Security Group | `rg-alz-networking` |
-| `rt-alz-{env}-{region}-01` | Route Table | `rg-alz-networking` |
-| `kv-alz-{env}-{region}-01` | Key Vault | `rg-alz-security` |
-| Policy assignments | Azure Policy | Subscription / RG scope |
-| RBAC assignments | Role assignments | Per resource group |
-| Lighthouse registration | Azure Lighthouse | Subscription scope |
+| **Management** | Platform observability and operations | Log Analytics Workspace, Automation Account, Azure Update Manager, Recovery Services Vault, Key Vault |
+| **Networking** | Hub VNet, segmentation, and routing | Hub VNet, NSG, route table, subnet layout pre-staged for Azure Firewall |
+| **Security** | Posture management and secrets | Defender for Cloud, Azure Security Benchmark policy, Key Vault (also in management layer for ops) |
+| **Identity** | Identity infrastructure placeholder | `rg-alz-identity` reserved; no resources deployed at Tier 1 |
+| **Workload** | Customer workload landing zone | Spoke VNet, NSG, peering to hub; backup and Defender policies target this RG |
+
+### Deployed Resources
+
+| Resource | Type | Resource group | Notes |
+|---|---|---|---|
+| `law-alz-{env}-{region}-01` | Log Analytics Workspace | `rg-alz-management` | Central diagnostic sink; 30-day default retention |
+| `aa-alz-{env}-{region}-01` | Automation Account | `rg-alz-management` | Linked to Log Analytics |
+| `mc-alz-{env}-{region}-01` | Maintenance Configuration | `rg-alz-management` | Update Manager daily patch schedule targeting workload RG |
+| `rsv-alz-{env}-{region}-01` | Recovery Services Vault | `rg-alz-management` | Default VM backup policy; geo-redundant; soft delete enabled |
+| `kv-alz-{env}-{region}-01` | Key Vault | `rg-alz-management` | `CanNotDelete` lock; diagnostic settings to Log Analytics |
+| `id-alz-deployScript-{env}-{region}` | User-Assigned Managed Identity | `mrg-*` (managed RG) | Deployment execution identity; self-revokes Owner after deployment |
+| `vn-alz-hub-{env}-{region}-{cidr}` | Virtual Network (hub) | `rg-alz-networking` | RFC1918 /16 default; `AzureFirewallSubnet`, `GatewaySubnet`, management subnet |
+| `nsg-alz-{env}-{region}-management` | Network Security Group | `rg-alz-networking` | Per-subnet; outbound HTTP (80) to internet blocked |
+| `rt-alz-{env}-{region}-management` | Route Table | `rg-alz-networking` | RFC1918 summary routes; no `0.0.0.0/0` default route at Tier 1 |
+| `vn-alz-spoke-{env}-{region}-{cidr}` | Virtual Network (spoke) | `rg-alz-workload` | RFC1918 /16 default; peered to hub |
+| `nsg-alz-{env}-{region}-workload` | Network Security Group | `rg-alz-workload` | Workload subnet NSG |
+| `budget-forge-lz-monthly` | Budget | Subscription | Configurable threshold; alerts at 80% actual and 100% forecast |
+| Policy — Azure Security Benchmark | Policy Assignment | Subscription | Built-in initiative; always assigned |
+| Policy — Defender for Servers | Policy Assignment | `rg-alz-workload` scope | Conditional; assigned when Standard or Enhanced Defender tier selected |
+| Policy — Backup DINE | Policy Assignment | Subscription | Auto-configures backup for VMs in workload RG |
+| `id-alz-policyRemediation-{env}-{region}` | User-Assigned Managed Identity | `rg-alz-management` | Policy remediation identity; Security Admin at subscription scope |
+| Lighthouse Registration Definition | Lighthouse | Subscription | frameType Solutions managing tenant |
+| 5x Lighthouse Registration Assignments | Lighthouse | Per operational RG | One delegation per resource group |
+
+### Networking Detail
+
+The hub VNet is deployed into `rg-alz-networking`. The spoke VNet is deployed into `rg-alz-workload`. Hub-spoke peering is bidirectional and configured at deployment time.
+
+Route tables are deployed with RFC1918 summary routes (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) and a `VnetLocal` next hop. There is no `0.0.0.0/0` default route at Tier 1 — internet-bound traffic follows the Azure system default route until Forge Connect introduces Azure Firewall and populates the default route without replacing existing infrastructure.
+
+### Management Detail
+
+All platform resources route diagnostic logs and metrics to the central Log Analytics Workspace. The Recovery Services Vault has soft delete enabled and a default backup policy — no protected instances are created until the customer onboards their VM workloads. The Automation Account is linked to Log Analytics and available for customer runbook use.
+
+### Security Detail
+
+Microsoft Defender for Cloud is deployed at the tier selected in the guided deployment experience. Basic is the default (free). Standard and Enhanced tiers add threat detection for server workloads via Defender for Servers. The Azure Security Benchmark policy initiative is always assigned at subscription scope, providing Secure Score population, regulatory compliance dashboard, and WAF-aligned configuration recommendations from day one.
 
 ---
 
-## Azure Pricing
+## 5. Azure Pricing
 
-Forge LZ Starter deploys infrastructure components that incur Azure consumption charges billed directly to your subscription. The Marketplace subscription fee covers frameType managed service access (monitoring and JIT support).
+Forge LZ Starter is a Marketplace managed application with a monthly subscription fee. Azure resource costs are billed directly to your subscription and are additional to the Marketplace fee.
 
-| Component | Estimated monthly cost | Notes |
+**Marketplace subscription fee:** $124/month — covers frameType Solutions managed service access (monitoring and JIT support via Lighthouse delegation).
+
+**Azure resource cost estimates** (approximate; varies by region, log volume, and usage):
+
+| Resource | Estimated monthly cost | Notes |
 |---|---|---|
-| Log Analytics Workspace | $2.30–$5.00/GB ingested | Varies by log volume; platform telemetry only at Tier 1 |
-| Automation Account | ~$0 (free tier for basic use) | Run As Account not required |
-| Recovery Services Vault | $0 (no protected items at deployment) | Backup policy ready — costs begin when VMs are protected |
-| Backup Vault | $0 (no protected items at deployment) | |
-| Key Vault | ~$0.03/10,000 operations | Minimal at platform-only usage |
-| VNets and peering | ~$1–$5/month | Peering cost depends on egress traffic volume |
-| Budget alerts | $0 | Cost Management feature — no charge |
-| Defender for Cloud (Basic) | $0 | Basic tier is free |
-| Defender for Cloud (Standard/Enhanced) | Per-resource pricing | See [Defender for Cloud pricing](https://azure.microsoft.com/en-us/pricing/details/defender-for-cloud/) |
-| Marketplace subscription fee | See listing | frameType managed service |
+| Log Analytics Workspace | $2.30–$5.00/GB ingested | Platform telemetry only at Tier 1; typical ingestion is low |
+| Automation Account | ~$0 | Free tier covers typical platform automation use (500 min/month) |
+| Recovery Services Vault | $0 at deployment | Backup storage costs begin when VM workloads are protected |
+| Azure Update Manager | $0 | No charge for Azure VMs |
+| Key Vault | ~$0.03 per 10,000 operations | Minimal at platform-only usage |
+| VNets and peering | ~$1–$5/month | Intra-region peering at $0.01/GB data processed; volume-dependent |
+| NSGs and route tables | $0 | No hourly or compute charge |
+| Budget alert | $0 | Azure Cost Management feature — no charge |
+| Defender for Cloud — Basic | $0 | Free CSPM tier; default selection |
+| Defender for Cloud — Standard | Per protected server | See Defender for Cloud pricing page |
+| Defender for Cloud — Enhanced | Per protected server | See Defender for Cloud pricing page |
 
-Estimate total costs using the [Azure Pricing Calculator](https://azure.microsoft.com/en-us/pricing/calculator/).
+Estimate your total costs using the [Azure Pricing Calculator](https://azure.microsoft.com/en-us/pricing/calculator/).
 
----
-
-## Prerequisites
-
-Complete the following before beginning the Marketplace deployment wizard.
-
-| Prerequisite | Details |
-|---|---|
-| Azure subscription | A new or dedicated subscription is strongly recommended. The offer deploys at subscription scope. |
-| Subscription Owner | The deploying account must hold Owner on the target subscription — required for Lighthouse and RBAC assignments. |
-| Entra ID permissions | Global Administrator, Groups Administrator, or User Administrator — required to run the pre-deployment script. |
-| PowerShell 7 | Required to run `alzPreDeployment.ps1`. Download: https://aka.ms/install-powershell |
-| Azure CLI | Required by the pre-deployment script. Download: https://aka.ms/installazurecli |
-| Address space planning | Two non-overlapping RFC1918 /16 blocks — one for the hub VNet, one for the spoke VNet. Default: `10.0.0.0/16` (hub) and `10.10.0.0/16` (spoke). |
-| Marketplace access | The deploying account must have access to Azure Marketplace in the target subscription. |
+For Defender for Cloud pricing detail, refer to the [Defender for Cloud pricing page](https://azure.microsoft.com/en-us/pricing/details/defender-for-cloud/).
 
 ---
 
-## Deployment Steps
+## 6. Prerequisites
+
+Complete all of the following before beginning the guided deployment experience.
+
+| Prerequisite | Requirement | Notes |
+|---|---|---|
+| Azure subscription | Dedicated subscription recommended | Deploy into a new or purpose-provisioned subscription. Tier 1 deploys at subscription scope. Mixing platform and workload resources in an existing subscription creates a refactor problem at Tier 2. |
+| Subscription Owner | Owner role on the target subscription | Required for Lighthouse delegation and RBAC assignments. Contributor is not sufficient. |
+| Entra ID permissions | Global Administrator, Groups Administrator, or User Administrator | Required to run the pre-deployment script and create Entra ID security groups. |
+| PowerShell 7+ | PowerShell 7 or later | Required to execute `alzPreDeployment.ps1`. [Download PowerShell](https://aka.ms/install-powershell) |
+| Azure CLI | Current release | Required by the pre-deployment script for group creation and Object ID retrieval. [Download Azure CLI](https://aka.ms/installazurecli) |
+| Address space planning | Two non-overlapping RFC1918 /16 CIDR blocks | One for the hub VNet, one for the spoke VNet. Defaults: `10.0.0.0/16` (hub), `10.10.0.0/16` (spoke). Ensure no overlap with existing on-premises or VNet ranges if hybrid connectivity is planned. |
+| Marketplace access | Azure Marketplace enabled on the target subscription | The deploying account must be able to purchase from Azure Marketplace in the target subscription. Verify in the Azure portal under **Marketplace settings**. |
+| Two Entra ID group Object IDs | Provided by the pre-deployment script | The guided deployment experience requires the Object IDs of the Platform Admins and Workload Admins groups on the Identity and Access step. The script creates these groups and displays the IDs ready to paste. |
+
+---
+
+## 7. Deployment Steps
 
 ```
-Step 1 — Run pre-deployment script   →   Step 2 — Deploy from Marketplace   →   Step 3 — Verify and onboard users
+Step 1 — Run pre-deployment script   →   Step 2 — Deploy from Marketplace   →   Step 3 — Verify
 ```
 
 ---
 
-### Step 1 — Run the Pre-Deployment Script (REQUIRED BEFORE MARKETPLACE WIZARD)
+### Step 1 — Run the Pre-Deployment Script
 
-The Marketplace deployment wizard requires the **Object IDs of two Entra ID security groups** on the Identity & Access step. These groups must exist in your tenant before you begin the wizard.
+> **Required before opening the guided deployment experience.**
+> The deployment wizard requires the Object IDs of two Entra ID security groups on the Identity and Access step. These groups must exist before you begin.
 
-The pre-deployment script creates both groups (or retrieves them if they already exist) and displays the Object IDs ready to paste into the wizard.
+**Download** `alzPreDeployment.ps1` from the [frameType Solutions GitHub repository](https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneStarter).
 
-Download and run the script from PowerShell 7:
+The script:
+
+1. Connects to your Azure tenant
+2. Creates (or retrieves if they already exist) two Entra ID security groups: `Platform Admins` and `Workload Admins`
+3. Registers required Azure resource providers on the target subscription
+4. Grants the Marketplace-created managed identity the permissions needed to execute deployment scripts within the target subscription
+5. Displays the Object ID of each group — **copy these values before closing the terminal**
 
 ```powershell
-# Download the script
-Invoke-WebRequest `
-  -Uri "https://raw.githubusercontent.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneStarter/main/preDeploymentScripts/alzPreDeployment.ps1" `
-  -OutFile ".\alzPreDeployment.ps1"
-
-# Unblock the downloaded file
-Unblock-File .\alzPreDeployment.ps1
-
-# Run the script
-.\alzPreDeployment.ps1
+# Run from PowerShell 7+
+./alzPreDeployment.ps1 -TenantId "<your-tenant-id>" -SubscriptionId "<your-subscription-id>"
 ```
 
-With custom group names (recommended — include an environment suffix):
+The script is signed with Azure Trusted Signing (`acs-frametypesol-prod-01`). If execution policy blocks the script, run:
 
 ```powershell
-.\alzPreDeployment.ps1 `
-    -PlatformAdminGroupName "grp-alz-platform-admins-prod" `
-    -WorkloadAdminGroupName "grp-alz-workload-admins-prod"
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
-
-On completion, the script displays:
-
-```
-================================================================
-  Forge LZ Starter — Pre-Deployment Complete
-================================================================
-
-  Copy these Object IDs into the deployment wizard.
-  You will be prompted for them in the Identity & Access step.
-
-  Platform Admin Group Object ID
-  xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-
-  Workload Admin Group Object ID
-  xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-
-================================================================
-```
-
-Copy both Object IDs — you will need them in Step 2.
-
-> **Permissions required:** The account running this script must hold one of **Global Administrator**, **Groups Administrator**, or **User Administrator** in Entra ID.
-
-> **Idempotent:** If the groups already exist, the script retrieves and reuses them. It is safe to run multiple times.
 
 ---
 
 ### Step 2 — Deploy from Azure Marketplace
 
-1. Find **Forge LZ Starter** in [Azure Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/apps?search=frametype)
-2. Click **Get It Now** and follow the deployment wizard
-3. Complete the **Basics** page and seven configuration steps:
+1. Navigate to the [Deploy Azure Landing Zone — Foundation](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/frametypesolutions.azurelandingzone) listing on Azure Marketplace
+2. Click **Get it now** and select the **Azure Landing Zone — Foundation** plan
+3. Complete the guided deployment experience:
 
-**Basics — Managed Application Setup**
-
-Use CAF-aligned values for all three naming fields rather than the portal-generated defaults:
-
-| Field | Recommended format | Example |
+| Step | Fields | Notes |
 |---|---|---|
-| Resource group | `rg-alz-{env}-{region}-managed` | `rg-alz-prod-eastus-managed` |
-| Application Name | `app-forge-lz-{env}-{region}` | `app-forge-lz-prod-eastus` |
-| Managed Resource Group | `mrg-alz-{env}-{region}-01` | `mrg-alz-prod-eastus-01` |
+| **Basics** | Subscription, region, resource group prefix, environment | Select the dedicated subscription. Choose your Azure region. |
+| **Networking** | Hub VNet CIDR, spoke VNet CIDR | Defaults: `10.0.0.0/16` and `10.10.0.0/16`. Change if overlap exists. |
+| **Security** | Defender for Cloud tier | Basic (default, free), Standard, or Enhanced. |
+| **Identity and Access** | Platform Admins Object ID, Workload Admins Object ID | Paste the Object IDs from Step 1. |
+| **Budget** | Budget amount (monthly), alert email address | Configurable threshold; alerts sent at 80% actual and 100% forecast. |
+| **Managed Service Access** | Lighthouse delegation toggle | Enabled by default. Provides frameType Solutions read and JIT support access. Disabling removes Lighthouse delegation from the deployment. |
+| **Review + create** | Review all selections | Validate, then click **Create**. |
 
-**Step 1 — Prerequisites:** Checklist confirmation — no values entered.
-
-**Step 2 — Environment:**
-
-| Field | Options | Default |
-|---|---|---|
-| Environment | `prod`, `dev`, `test`, `infra` | `prod` |
-| Hub VNet address space | RFC1918 /16 block | `10.0.0.0/16` |
-| Spoke VNet address space | RFC1918 /16 block | `10.10.0.0/16` |
-
-**Step 3 — Identity Prerequisites:** Informational — review group guidance and confirm the pre-deployment script has been run.
-
-**Step 4 — Identity & Access:** Paste the two Object IDs from the pre-deployment script output.
-
-**Step 5 — Security:** Select Defender for Cloud tier (Basic / Standard / Enhanced).
-
-**Step 6 — Governance & Cost:**
-
-| Field | Description |
-|---|---|
-| Landing zone owner email | Applied as `owner` tag on all resource groups |
-| Cost center code | Applied as `costCenter` tag on all resource groups |
-| Monthly budget | Notification threshold $100–$50,000; default $500 |
-| Budget alert email | Defaults to owner email — override for a shared ops mailbox |
-
-**Step 7 — Post-Deployment Steps:** Review the post-deployment checklist before clicking **Create**.
-
-4. Deployment typically completes in **15–20 minutes**
+4. Deployment runs as a Marketplace managed application. The guided deployment experience creates a managed resource group (`mrg-*`) containing deployment infrastructure. All operational resources are deployed into the five named resource groups.
 
 ---
 
 ### Step 3 — Verify and Onboard Users
 
-After the Marketplace deployment completes, complete the [Post-Deployment Verification](#post-deployment-verification) checklist, then add users to the Entra ID security groups:
-
-- **Platform Admins group** — platform and security operations personnel
-- **Workload Admins group** — application and workload deployment teams
+Complete post-deployment verification per [Section 8](#8-post-deployment-verification), then add members to the two Entra ID security groups created by the pre-deployment script.
 
 ---
 
-## Post-Deployment Verification
+## 8. Post-Deployment Verification
 
-Forge LZ Starter is fully automated — no mandatory post-deployment configuration is required. Complete the following verification steps after deployment succeeds.
+Complete these steps after deployment reports **Succeeded** in the Azure portal.
 
-**Step 1 — Verify resource group deployment**
+**Step 1 — Confirm resource groups**
 
 Navigate to **Azure Portal → Resource groups**. Confirm all five resource groups exist with `Succeeded` provisioning state:
 
@@ -258,7 +266,9 @@ Navigate to **Azure Portal → Resource groups**. Confirm all five resource grou
 
 **Step 2 — Verify Lighthouse delegation**
 
-Navigate to **Azure Portal → Azure Lighthouse → Service providers → Service provider offers**. Forge LZ Starter should appear with five active resource group delegations. If delegations are missing after 30 minutes, check the `deploymentScript` resource in the managed resource group for errors and contact frameType Solutions support.
+Navigate to **Azure Portal → Azure Lighthouse → Service providers → Service provider offers**. The offer should appear as `Forge LZ — Foundation` with five active resource group delegations.
+
+If delegations are missing after 30 minutes, check the `deploymentScript` resource in the managed resource group (`mrg-*`) under **Deployments** for errors. Contact [support@frametypesolutions.com](mailto:support@frametypesolutions.com) if errors persist.
 
 **Step 3 — Verify RBAC assignments**
 
@@ -266,172 +276,343 @@ Navigate to each resource group → **Access control (IAM) → Role assignments*
 
 | Group | Role | Resource group |
 |---|---|---|
-| Platform Admins | Reader | `rg-alz-management`, `rg-alz-networking`, `rg-alz-security` |
+| Platform Admins | Reader | `rg-alz-management` |
+| Platform Admins | Reader | `rg-alz-networking` |
+| Platform Admins | Reader | `rg-alz-security` |
 | Platform Admins | Key Vault Secrets Officer | `rg-alz-security` |
 | Workload Admins | Contributor | `rg-alz-workload` |
 | Workload Admins | Key Vault Reader | `rg-alz-security` |
 
 **Step 4 — Review Defender for Cloud recommendations**
 
-Navigate to **Azure Portal → Microsoft Defender for Cloud → Recommendations**. The Azure Security Benchmark policy begins evaluating your environment shortly after deployment. Initial results may take 15–30 minutes to populate. Review high-severity recommendations first.
+Navigate to **Azure Portal → Microsoft Defender for Cloud → Recommendations**. The Azure Security Benchmark policy begins evaluating your environment shortly after deployment. Initial results may take 15–30 minutes to populate. Review high-severity recommendations and address those relevant to your workload plans.
 
-**Step 5 — Populate Entra ID security groups with members**
+**Step 5 — Add members to Entra ID security groups**
 
-RBAC roles have been assigned to the groups automatically — users still need to be added. Navigate to **Azure Portal → Microsoft Entra ID → Groups → [select group] → Members → Add members**. Repeat for both the Platform Admins and Workload Admins groups.
+RBAC roles have been assigned to the groups automatically. Users are not added by the deployment — this is intentional to preserve least-privilege control.
+
+Navigate to **Azure Portal → Microsoft Entra ID → Groups → [select group] → Members → Add members**. Repeat for both Platform Admins and Workload Admins groups.
+
+**Step 6 — Confirm budget alert**
+
+Navigate to **Azure Portal → Cost Management → Budgets**. Confirm `budget-forge-lz-monthly` is present with your configured threshold and alert email.
 
 ---
 
-## Zero Trust Alignment
+## 9. Zero Trust Alignment
 
 <!-- consumed-by: web | field: zeroTrust -->
 Forge LZ Starter is designed around Microsoft's Zero Trust security principles. Every architectural decision maps to one or more of the three core principles: **Verify Explicitly**, **Use Least Privilege**, and **Assume Breach**.
 
 | Principle | Implementation |
 |---|---|
-| **Verify Explicitly** | All access to landing zone resources is controlled via Entra ID group membership and Azure RBAC — no shared credentials or standing access outside defined roles. Lighthouse MFA is required for every PIM activation before write access is granted. Defender for Cloud Basic evaluates configuration continuously against the Azure Security Benchmark policy. |
-| **Use Least Privilege** | Platform Admins receive Reader only on infrastructure resource groups — no write capability. Workload Admins receive Contributor on the workload RG only — not subscription-wide. Key Vault access is split: Secrets Officer for platform (management plane) and Reader for workload (data plane retrieval only). frameType holds Reader permanently and Contributor only via PIM activation with an 8-hour maximum duration. |
-| **Assume Breach** | Outbound internet traffic is restricted to port 443 only at the NSG level. No public IP addresses are deployed on platform resources. Diagnostic settings route all platform telemetry to Log Analytics for centralized visibility. The routing layer is pre-staged for Azure Firewall (Forge Connect, Tier 2) — enabling deep packet inspection and threat intelligence-based filtering when added. |
+| **Verify Explicitly** | All access to landing zone resources is governed by Entra ID group membership and Azure RBAC — no shared credentials, no standing write access outside defined roles. Lighthouse MFA is required at every PIM activation before write access is granted. Defender for Cloud continuously evaluates configuration against the Azure Security Benchmark policy. |
+| **Use Least Privilege** | Platform Admins receive Reader only on infrastructure resource groups — no write capability. Workload Admins receive Contributor on the workload RG only — not subscription-wide. Key Vault access is split: Secrets Officer for the platform team (management plane), Reader for the workload team (data plane retrieval only). The policy remediation managed identity is a dedicated, separate identity with Security Admin scoped to subscription — not a general-purpose identity. frameType's Lighthouse Reader group has permanent Reader only (passive visibility). frameType's Lighthouse Engineers group is PIM-eligible Contributor — JIT activation, MFA required, 8-hour maximum per session. |
+| **Assume Breach** | NSG rules block outbound HTTP (port 80) to the internet; HTTPS (443) is permitted for Azure service communication. No public IPs are assigned to any platform resource. Key Vault is protected with a `CanNotDelete` resource lock. Lighthouse delegations are per resource group and independently revocable. Diagnostic settings route events for all platform resources to Log Analytics from the first deployment. Defender for Cloud provides continuous security posture assessment and Secure Score tracking. |
 
-### Networking
+### Zero Trust and Networking
 
-- NSG outbound rules restrict internet egress to HTTPS (port 443) only
-- No `0.0.0.0/0` default route at Tier 1 — RFC1918 summary routes use `VnetLocal` next hop
-- Route table is upgrade-ready: Forge Connect populates the default route with the Azure Firewall private IP without replacing existing infrastructure
-- No public IP addresses on platform resources
+- **No default internet route at Tier 1** — route tables deploy with RFC1918 summary routes and `VnetLocal` next hop; there is no `0.0.0.0/0` route pointing to the internet
+- **Outbound restriction** — NSG rules block outbound HTTP (port 80) to the internet; HTTPS (port 443) is permitted for Azure service communication
+- **Subnet segmentation** — hub and spoke VNets are isolated and peered; east-west traffic between subnets is controllable via NSG rules without topology changes
+- **Upgrade-ready** — Forge Connect adds Azure Firewall and populates the default route; no routing infrastructure is replaced at upgrade
 
-### Identity
+### Zero Trust and Identity
 
-- All administrative access is group-based — no direct user assignments
-- frameType JIT access requires PIM activation, MFA, and has an 8-hour maximum duration
-- Lighthouse delegation is revocable at any time from **Azure Portal → Lighthouse → Service provider offers → Delete**
+- **No standing write access** — frameType engineers must PIM-activate their Lighthouse role for each support engagement; all activations appear in the customer's Azure Activity Log
+- **Customer group ownership** — Platform Admins and Workload Admins groups are in the customer's own Entra ID tenant; the customer owns and controls group membership throughout
+- **Separation of duties** — policy remediation and deployment execution use distinct managed identities with separate, narrowly scoped permissions
 
----
-
-## Azure Governance
-
-Forge LZ Starter implements CAF and WAF guidance through automated policy and consistent resource configuration.
-
-| Control | Implementation |
-|---|---|
-| Resource tagging | `environment`, `workload`, `owner`, `costCenter` tags applied to all resource groups at deployment |
-| Backup policy | DINE policy assigns Azure Backup to all VMs in `rg-alz-workload` automatically |
-| Defender for Servers | DINE policy deploys Defender for Servers to `rg-alz-workload` (Standard/Enhanced tiers) |
-| Update management | Azure Update Manager maintenance configuration targets `rg-alz-workload` |
-| Cost alerting | Budget with configurable threshold and email alerts |
-| Diagnostic settings | Platform resource logs routed to Log Analytics at deployment |
+For Microsoft's Zero Trust reference architecture for Azure infrastructure, refer to: [Zero Trust guidance for Azure IaaS](https://learn.microsoft.com/en-us/security/zero-trust/azure-infrastructure-overview)
 
 ---
 
-## Naming Conventions
+## 10. Azure Governance
 
-All resources follow the [CAF naming convention](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming):
+Forge LZ Starter follows [CAF naming conventions](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming) and tagging practices across all deployed resources.
 
-```
-{resource-type}-{workload}-{environment}-{region}-{instance}
-```
+### Tagging
 
-| Token | Value | Example |
+The following tags are applied to all resource groups at deployment time:
+
+| Tag | Source | Purpose |
 |---|---|---|
-| `{resource-type}` | CAF abbreviation | `vnet`, `nsg`, `kv`, `law` |
-| `{workload}` | `alz` (hardcoded) | `alz` |
-| `{environment}` | Wizard input | `prod`, `dev`, `test`, `infra` |
-| `{region}` | Full Azure region name | `eastus`, `westus2` |
+| `environment` | Guided deployment experience input | Environment classification (prod, dev, test, infra) |
+| `owner` | Guided deployment experience input | Ownership contact or team name |
+| `costCenter` | Guided deployment experience input | Cost attribution for financial reporting |
+
+Tags are applied at resource group level and propagate to resources via Azure Policy inheritance where configured.
+
+### Azure Policy
+
+| Policy | Scope | Effect | Condition |
+|---|---|---|---|
+| Azure Security Benchmark initiative | Subscription | Audit / DeployIfNotExists | Always assigned |
+| Backup DINE policy | Subscription | DeployIfNotExists | Always assigned; targets `rg-alz-workload` VMs |
+| Defender for Servers granular pricing | `rg-alz-workload` scope | DeployIfNotExists | Conditional — assigned when Standard or Enhanced Defender tier selected |
+
+RBAC assignments are scoped to the minimum required resource group level — no subscription-wide Owner or Contributor roles are assigned to customer accounts by this offer.
+
+### Well-Architected Framework Alignment
+
+The offer is designed in alignment with the five WAF pillars:
+
+- **Reliability** — Recovery Services Vault, Update Manager, and geo-redundant storage options
+- **Security** — Zero Trust controls, Defender for Cloud, Azure Policy, Key Vault, and Lighthouse with JIT access
+- **Cost Optimization** — budget alerts, Basic Defender by default, free tier services where appropriate
+- **Operational Excellence** — Log Analytics from deployment, tagging, and policy-driven automation
+- **Performance Efficiency** — hub-spoke topology scalable to Forge Connect without infrastructure replacement
+
+For more on the Well-Architected Framework, refer to: [Azure Well-Architected Framework](https://learn.microsoft.com/en-us/azure/well-architected/)
+
+---
+
+## 11. Naming Conventions
+
+All resources follow the [CAF recommended naming convention](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming):
+
+```
+{resource-type}-{workload}-{qualifier}-{environment}-{region}-{instance}
+```
+
+| Token | Value | Notes |
+|---|---|---|
+| `{resource-type}` | CAF abbreviation | `rg`, `vnet`, `nsg`, `kv`, `law`, `aa`, etc. |
+| `{workload}` | `alz` | Hardcoded — represents the offer identity |
+| `{qualifier}` | Descriptive (where used) | `hub`, `spoke`, `management`, `workload` — applied where discriminator is needed |
+| `{environment}` | Guided deployment input | `prod`, `dev`, `test`, `infra` |
+| `{region}` | Full Azure region name | `eastus`, `westus2`, `australiaeast` — full name per CAF standard |
 | `{instance}` | Zero-padded sequence | `01` |
 
-**Examples:**
+**Naming examples:**
 
-| Resource | Name |
+| Resource | Example name |
 |---|---|
+| Management resource group | `rg-alz-management-prod-eastus-01` |
+| Networking resource group | `rg-alz-networking-prod-eastus-01` |
 | Log Analytics Workspace | `law-alz-prod-eastus-01` |
-| Hub VNet | `vnet-alz-hub-prod-eastus-01` |
 | Key Vault | `kv-alz-prod-eastus-01` |
-| Management RG | `rg-alz-management-prod-eastus-01` |
+| Automation Account | `aa-alz-prod-eastus-01` |
+| Hub VNet | `vn-alz-hub-prod-eastus-10.0` |
+| Spoke VNet | `vn-alz-spoke-prod-eastus-10.10` |
+| Hub NSG | `nsg-alz-prod-eastus-management` |
+| Route table | `rt-alz-prod-eastus-management` |
+| Recovery Services Vault | `rsv-alz-prod-eastus-01` |
+
+> VNet and related resources use the first two octets of the address space as the instance discriminator (e.g., `10.0`, `10.10`) in place of the sequential `01` suffix, making the address space visible in the resource name and avoiding collision in multi-VNet environments.
 
 ---
 
-## Identity and RBAC
+## 12. Identity and RBAC
 
-| Principal | Type | Scope | Role |
+### Customer Identity
+
+Two Entra ID security groups are created by the pre-deployment script and supplied to the guided deployment experience. RBAC roles are assigned to these groups at deployment time.
+
+| Principal | Type | Scope | Role | Notes |
+|---|---|---|---|---|
+| Platform Admins | Customer Entra ID group | `rg-alz-management` | Reader | Visibility into management resources |
+| Platform Admins | Customer Entra ID group | `rg-alz-networking` | Reader | Visibility into networking resources |
+| Platform Admins | Customer Entra ID group | `rg-alz-security` | Reader | Visibility into security resources |
+| Platform Admins | Customer Entra ID group | `rg-alz-security` | Key Vault Secrets Officer | Management plane access to Key Vault |
+| Workload Admins | Customer Entra ID group | `rg-alz-workload` | Contributor | Deploy and manage workload resources |
+| Workload Admins | Customer Entra ID group | `rg-alz-security` | Key Vault Reader | Data plane read access to Key Vault secrets |
+
+### Deployment and Remediation Identities
+
+| Principal | Type | Scope | Role | Lifecycle |
+|---|---|---|---|---|
+| `id-alz-deployScript-{env}-{region}` | User-assigned managed identity | Subscription | Owner (temporary) | Created in managed RG; self-revokes Owner role assignment on completion; persists inert in managed RG |
+| `id-alz-policyRemediation-{env}-{region}` | User-assigned managed identity | Subscription | Security Admin | Created in `rg-alz-management`; used by Azure Policy remediation tasks |
+
+### frameType Solutions — Lighthouse Identity
+
+| Principal | Type | Scope | Role | Mechanism |
+|---|---|---|---|---|
+| `lighthouseReaders` | frameType Entra ID group | Five operational RGs | Reader | Permanent — passive monitoring visibility |
+| `lighthouseEngineers` | frameType Entra ID group | Five operational RGs | Contributor (PIM-eligible) | JIT only — MFA required, 8-hour maximum, every activation logged |
+
+All frameType Lighthouse access is scoped to the five operational resource groups. No access is delegated at subscription scope or above. Delegations are independently revocable per resource group.
+
+---
+
+## 13. Managed Service Access
+
+Forge LZ Starter includes Azure Lighthouse delegation to frameType Solutions as part of the offer. The monthly subscription fee of $124 covers this managed service access.
+
+### Access Model
+
+| Access type | Mechanism | Scope | Duration |
 |---|---|---|---|
-| Platform Admins group | Customer Entra group | `rg-alz-management` | Reader |
-| Platform Admins group | Customer Entra group | `rg-alz-networking` | Reader |
-| Platform Admins group | Customer Entra group | `rg-alz-security` | Reader |
-| Platform Admins group | Customer Entra group | `rg-alz-security` | Key Vault Secrets Officer |
-| Workload Admins group | Customer Entra group | `rg-alz-workload` | Contributor |
-| Workload Admins group | Customer Entra group | `rg-alz-security` | Key Vault Reader |
-| Policy Identity | Managed identity | `rg-alz-management` | Contributor (policy remediation) |
-| frameType lighthouseReaders | frameType Entra group | Five operational RGs | Reader (permanent) |
-| frameType lighthouseEngineers | frameType Entra group | Five operational RGs | Contributor (PIM-eligible, 8hr max) |
+| Monitoring (read) | Permanent Reader via Lighthouse | Five operational resource groups | Persistent while delegation active |
+| Support and operations (write) | PIM-eligible Contributor via Lighthouse | Five operational resource groups | JIT — MFA required; maximum 8 hours per activation |
+
+### What frameType Can Access
+
+frameType Solutions can access resources within the five operational resource groups: `rg-alz-management`, `rg-alz-networking`, `rg-alz-security`, `rg-alz-identity`, and `rg-alz-workload`.
+
+frameType has no access to the managed resource group (`mrg-*`) contents after deployment, no access to other subscriptions in your tenant, and no standing write access to any resource.
+
+### What frameType Cannot Access
+
+- Resources outside the five operational resource groups
+- Other subscriptions or management groups in your tenant
+- Your Entra ID directory
+- Key Vault secrets (data plane) — the frameType Lighthouse Reader role is Reader only; Key Vault Secrets Officer is assigned to your Platform Admins group, not to frameType
+
+### Revoking Access
+
+Lighthouse delegation is revocable at any time without impact to deployed resources. To remove a delegation:
+
+1. Navigate to **Azure Portal → Azure Lighthouse → Service providers → Service provider offers**
+2. Select the Forge LZ delegation
+3. Click **Delete** on the specific resource group delegation to revoke selectively, or delete all five to remove frameType access entirely
+
+Revoking Lighthouse delegation does not remove or affect any deployed resources. It only removes frameType's ability to view or access those resource groups.
 
 ---
 
-## Managed Service Access
+## 14. Troubleshooting
 
-Forge LZ Starter includes Azure Lighthouse delegation to frameType Solutions as part of the offer.
+### Pre-Deployment Script Fails — Insufficient Permissions
 
-| Access type | Mechanism | Scope |
-|---|---|---|
-| Monitoring (read) | Permanent Reader | Five operational resource groups |
-| Support / operations (write) | PIM-eligible Contributor — MFA required, 8-hour maximum | Five operational resource groups |
+**Symptom:** The script reports an error creating Entra ID groups or fails to complete provider registration.
 
-**What frameType can access:** Resources within the five operational resource groups (`rg-alz-management`, `rg-alz-networking`, `rg-alz-security`, `rg-alz-identity`, `rg-alz-workload`). No access to other subscriptions, tenants, or resources outside these groups.
+**Resolution:** Confirm the account running the script holds Global Administrator, Groups Administrator, or User Administrator in the target Entra ID tenant. Confirm the account holds Owner on the target subscription for provider registration. Re-run the script after correcting the role.
 
-**What frameType cannot access:** Your Entra ID tenant, other subscriptions, resource groups not listed above, or any data stored within your resources.
+### Deployment Fails — Owner Role Not Propagated
 
-**Revoking access:** Navigate to **Azure Portal → Azure Lighthouse → Service providers → Service provider offers → Forge LZ Starter → Delete**. Delegation is revoked immediately.
+**Symptom:** The deploymentScript resource in the managed resource group (`mrg-*`) reports a failure related to role assignment propagation.
 
----
+**Resolution:** Azure RBAC role assignments can take up to five minutes to propagate after assignment. The managed identity requires Owner at subscription scope to execute the nested deployment. If the deployment fails within the first few minutes, wait five minutes and redeploy. If the failure persists, check the deploymentScript logs in the managed resource group under **Deployments**.
 
-## Troubleshooting
+### Lighthouse Delegations Missing After Deployment
 
-| Symptom | Likely cause | Resolution |
-|---|---|---|
-| Pre-deployment script fails with permission error | Account lacks Entra ID group creation rights | Confirm the account holds Global Administrator, Groups Administrator, or User Administrator. Re-run the script with an eligible account. |
-| Wizard Identity & Access step rejects Object IDs | Object IDs are from a different tenant, or contain extra whitespace | Copy Object IDs directly from the script output. Confirm the groups exist in the same tenant as the target subscription. |
-| Deployment fails at Lighthouse registration | deploymentScript managed identity lacks required permissions | The managed identity requires `Microsoft.ManagedServices/registrationAssignments/write` at subscription scope. This is included in the Owner role — confirm the deploying account holds Owner. |
-| Lighthouse delegation missing after 30 minutes | deploymentScript execution failed silently | Navigate to **Azure Portal → Resource groups → mrg-{name} → Deployments**. Inspect the `deploymentScript` resource and review the execution log for errors. |
-| RBAC assignments not visible after deployment | Propagation delay | Azure RBAC assignments can take up to 5 minutes to propagate. Refresh the IAM blade and confirm group membership. |
-| Defender for Cloud recommendations missing | Policy evaluation lag | Initial evaluation after deployment can take 15–30 minutes. Navigate to **Defender for Cloud → Recommendations** and trigger a manual assessment if needed. |
+**Symptom:** The offer deployed successfully but Azure Lighthouse shows no active delegations under Service provider offers.
 
----
+**Resolution:** Lighthouse registration assignments are deployed as part of the nested subscription-scoped deployment. Allow up to 30 minutes for delegations to propagate and appear in the Lighthouse blade. If delegations are still absent after 30 minutes, navigate to the managed resource group → **Deployments** and check the `deploy-lighthouse` and `deploy-lighthouseAssignment-*` deployment records for errors. Contact [support@frametypesolutions.com](mailto:support@frametypesolutions.com) if errors are present.
 
-## Upgrade Path
+### RBAC Assignments Missing
 
-| Tier | Offer | What it adds |
-|---|---|---|
-| **Tier 1 — this offer** | Forge LZ Starter | Single-subscription landing zone, hub-spoke networking, Zero Trust baseline, governance, Lighthouse managed service |
-| **Tier 2** | Forge Connect | Azure Firewall, default route population, Private DNS zones, NSG flow logs, multi-subscription peering |
-| **Tier 3** | Forge Enterprise | Management Group hierarchy, cross-subscription governance, enterprise-scale policy initiative |
+**Symptom:** One or more role assignments are not visible in the expected resource group after deployment.
 
-The Tier 1 route table and subnet configuration are upgrade-ready — Forge Connect extends the existing infrastructure rather than replacing it.
+**Resolution:** RBAC assignments can take several minutes to appear in the portal after a successful deployment. Refresh the Access control (IAM) blade after five minutes. Confirm the Object IDs entered in the guided deployment experience match the groups created by the pre-deployment script — a mismatched Object ID results in an assignment to a non-existent principal, which is valid ARM but invisible in the portal. Re-run the script to retrieve the correct Object IDs and verify.
+
+### Defender for Cloud Recommendations Not Populating
+
+**Symptom:** The Microsoft Defender for Cloud Recommendations blade shows no results shortly after deployment.
+
+**Resolution:** Initial evaluation against the Azure Security Benchmark policy takes 15–30 minutes after deployment. This is expected behavior. Return to the Recommendations blade after 30 minutes. If no recommendations appear after an hour, navigate to **Defender for Cloud → Environment settings** and confirm the Azure Security Benchmark initiative is assigned to the subscription.
+
+### Key Vault Deployment Fails on Redeploy — Soft Delete Conflict
+
+**Symptom:** A redeployment (after a teardown) fails with a conflict on Key Vault creation, reporting the vault name is already taken or in a deleted state.
+
+**Resolution:** Azure Key Vault soft delete is enabled by default and retains deleted vaults for 90 days. To resolve: navigate to **Azure Portal → Key Vault → Manage deleted vaults**, select the vault, and click **Purge**. Alternatively, use the Azure CLI: `az keyvault purge --name <vault-name> --location <region>`. After purging, redeploy.
 
 ---
 
-## Conclusion
+## 15. Upgrade Path
 
-Forge LZ Starter provides a production-grade, CAF-aligned Azure Landing Zone foundation for organizations beginning their Azure journey or formalizing an existing subscription. The deployment is repeatable, governed by Microsoft framework guidance, and architecturally designed for growth — the Forge Connect and Enterprise tiers extend this foundation without replacement of existing infrastructure.
+Forge LZ Starter is Tier 1 of a three-tier Azure Landing Zone suite. The hub-spoke topology, route table structure, and subnet layout are designed for forward compatibility at every tier.
 
-For questions or support, contact [frameType Solutions](https://azuremarketplace.microsoft.com/en-us/marketplace/apps?search=frametype).
+| Tier | Offer | What it adds | Upgrade model |
+|---|---|---|---|
+| **Tier 1** | Forge LZ Starter *(this offer)* | Five resource groups, hub-spoke networking, governance, RBAC, Lighthouse, Defender for Cloud | Foundation — deploy first |
+| **Tier 2** | Forge LZ Connect *(coming soon)* | Azure Firewall, default route, Private DNS Zones, multi-subscription peering, VPN or ExpressRoute gateway options | Extends Tier 1 — no infrastructure replacement |
+| **Tier 3** | Forge LZ Enterprise *(coming soon)* | Management Group hierarchy, enterprise-scale governance, multiple landing zone subscriptions, Policy at MG scope | Extends Tier 2 — structural expansion |
+
+**No rebuilding required.** The route tables deployed at Tier 1 are pre-staged to receive the Azure Firewall default route at Tier 2. The `AzureFirewallSubnet` in the hub VNet is sized and ready. Tier 2 adds infrastructure; it does not replace what Tier 1 deployed.
+
+Customers running Azure Firewall independently can engage frameType Solutions for a deployment review and upgrade path assessment. See [frametypesolutions.com](https://frametypesolutions.com) for professional services options.
 
 ---
 
-## References
+## 16. Conclusion
 
-| Resource | URL |
+Forge LZ Starter delivers a complete, production-grade Azure Landing Zone foundation in a single guided deployment — CAF-aligned, Zero Trust by design, and built for forward compatibility with the Forge LZ suite. Five resource groups, hub-spoke networking, governance controls, and managed service access are all configured at deployment time, not as follow-on tasks.
+
+For support, questions, or professional services engagements, contact [support@frametypesolutions.com](mailto:support@frametypesolutions.com) or visit the [frameType Solutions product page](https://frametypesolutions.com/marketplace/alz-foundation).
+
+---
+
+## 17. References
+
+| Resource | Link |
 |---|---|
-| Cloud Adoption Framework | https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ |
-| CAF Naming Conventions | https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming |
-| CAF Resource Abbreviations | https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations |
-| Well-Architected Framework | https://learn.microsoft.com/en-us/azure/well-architected/ |
-| Zero Trust for Azure IaaS | https://learn.microsoft.com/en-us/security/zero-trust/azure-infrastructure-overview |
-| Azure Lighthouse documentation | https://learn.microsoft.com/en-us/azure/lighthouse/ |
-| Azure Policy documentation | https://learn.microsoft.com/en-us/azure/governance/policy/ |
-| RBAC Best Practices | https://learn.microsoft.com/en-us/azure/role-based-access-control/best-practices |
-| Defender for Cloud pricing | https://azure.microsoft.com/en-us/pricing/details/defender-for-cloud/ |
-| Azure Cost Management | https://learn.microsoft.com/en-us/azure/cost-management-billing/ |
-| Azure Pricing Calculator | https://azure.microsoft.com/en-us/pricing/calculator/ |
-| frameType Solutions on Marketplace | https://azuremarketplace.microsoft.com/en-us/marketplace/apps?search=frametype |
+| Azure Landing Zone — CAF guidance | [https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/) |
+| CAF naming convention | [https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming) |
+| CAF tagging strategy | [https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-tagging](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-tagging) |
+| Azure Well-Architected Framework | [https://learn.microsoft.com/en-us/azure/well-architected/](https://learn.microsoft.com/en-us/azure/well-architected/) |
+| Zero Trust guidance for Azure IaaS | [https://learn.microsoft.com/en-us/security/zero-trust/azure-infrastructure-overview](https://learn.microsoft.com/en-us/security/zero-trust/azure-infrastructure-overview) |
+| Azure Lighthouse documentation | [https://learn.microsoft.com/en-us/azure/lighthouse/overview](https://learn.microsoft.com/en-us/azure/lighthouse/overview) |
+| Azure Privileged Identity Management | [https://learn.microsoft.com/en-us/azure/active-directory/privileged-identity-management/pim-configure](https://learn.microsoft.com/en-us/azure/active-directory/privileged-identity-management/pim-configure) |
+| Microsoft Defender for Cloud | [https://learn.microsoft.com/en-us/azure/defender-for-cloud/defender-for-cloud-introduction](https://learn.microsoft.com/en-us/azure/defender-for-cloud/defender-for-cloud-introduction) |
+| Azure Security Benchmark | [https://learn.microsoft.com/en-us/security/benchmark/azure/introduction](https://learn.microsoft.com/en-us/security/benchmark/azure/introduction) |
+| Azure Policy — DINE effect | [https://learn.microsoft.com/en-us/azure/governance/policy/concepts/effect-deploy-if-not-exists](https://learn.microsoft.com/en-us/azure/governance/policy/concepts/effect-deploy-if-not-exists) |
+| Azure Update Manager | [https://learn.microsoft.com/en-us/azure/update-manager/overview](https://learn.microsoft.com/en-us/azure/update-manager/overview) |
+| Azure Verified Modules | [https://azure.github.io/Azure-Verified-Modules/](https://azure.github.io/Azure-Verified-Modules/) |
+| Marketplace managed applications | [https://learn.microsoft.com/en-us/azure/azure-resource-manager/managed-applications/overview](https://learn.microsoft.com/en-us/azure/azure-resource-manager/managed-applications/overview) |
+| Azure Pricing Calculator | [https://azure.microsoft.com/en-us/pricing/calculator/](https://azure.microsoft.com/en-us/pricing/calculator/) |
+| frameType Solutions product page | [https://frametypesolutions.com/marketplace/alz-foundation](https://frametypesolutions.com/marketplace/alz-foundation) |
+| frameType Solutions GitHub | [https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneStarter](https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneStarter) |
 
 ---
 
-*Version 1.0 | frameType Solutions | May 2026*
+Version 1.0 | frameType Solutions | May 2026
+
+---
+
+<!--
+  ============================================================
+  BUILD REPO CONVENTIONS — INTERNAL ONLY
+  Strip this section before promoting to public offer repo.
+  ============================================================
+-->
+
+## Build Repo Conventions
+
+> **Internal only.** This section is not promoted to the public offer repo.
+> Strip everything from this heading to the end of the file at the manual release gate.
+
+### Package Source Traceability
+
+| Artifact | Source | Notes |
+|---|---|---|
+| `mainTemplate.json` | Hand-authored ARM — not compiled from Bicep | Thin RG-scoped wrapper; `_artifactsLocation` + nested template pattern |
+| `subscriptionDeploy.json` | Compiled from `solutionDev-azureLandingZone/bicep/tiers/starter/main.bicep` then patched | Do not recompile from Bicep source without re-applying all patches (see HANDOFF.md Section 6) |
+| `createUiDefinition.json` | Hand-authored in this repo | Validate in portal sandbox before any change |
+| `alzPreDeployment.ps1` | Authored in this repo | Signed with `acs-frametypesol-prod-01`; re-sign after any change |
+
+### Known Post-Compile Patches — `subscriptionDeploy.json`
+
+All patches applied directly to `subscriptionDeploy.json`. Recompiling from Bicep requires re-applying all of the following:
+
+1. `deployment().location` → `parameters('location')` on subscription-scoped nested deployments
+2. Networking API version `2024-11-01` → `2024-10-01` (Key Vault stays at `2024-11-01`)
+3. ALZ-BUILD-019 race condition fix — `dependsOn` added to `hubPeering` and `spokePeering`
+4. ALZ-BUILD-021 Lighthouse activation — `deploy-lighthouse` + 5x `deploy-lighthouseAssignment-*` deployments added
+
+### Package Build Command
+
+```powershell
+# From repo root — produces alzfoundation-v{version}.zip
+Compress-Archive -Path mainTemplate.json, createUiDefinition.json, nestedtemplates, preDeploymentScripts `
+                 -DestinationPath alzfoundation-v2.2.0.zip -Force
+```
+
+### Version Alignment
+
+Partner Center package version must match the version referenced in this README and HANDOFF.md. Current version: `2.2.0`.
+
+### Promotion Checklist
+
+Before committing to `msMarketplaceOffer-azureLandingZoneStarter`:
+
+- [ ] Architecture diagram added at Section 4 (replace placeholder)
+- [ ] Marketplace listing URL confirmed live and correct
+- [ ] GitHub repository URL confirmed correct
+- [ ] Product page URL confirmed live (`frametypesolutions.com/marketplace/alz-foundation`)
+- [ ] This Build Repo Conventions section removed in its entirety
+- [ ] Working copy banner at top of file removed
+- [ ] Version footer updated to match release version and date
