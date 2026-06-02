@@ -1,7 +1,7 @@
 <!--
-  WORKING COPY — msMarketplaceBuild-azureLandingZoneStarter
+  WORKING COPY — msMarketplaceBuild-azureLandingZoneFoundation
   This is the authoritative source for all README content.
-  Promote to: msMarketplaceOffer-azureLandingZoneStarter/README.md
+  Promote to: msMarketplaceOffer-azureLandingZoneFoundation/README.md
   Strip before promotion: "Build Repo Conventions" section at the end of this file.
   Last updated: 2026-05-31 | ALZ-BUILD-028
 -->
@@ -201,7 +201,7 @@ Step 1 — Run pre-deployment script   →   Step 2 — Deploy from Marketplace 
 > **Required before opening the guided deployment experience.**
 > The deployment wizard requires the Object IDs of two Entra ID security groups on the Identity and Access step. These groups must exist before you begin.
 
-**Download** `alzPreDeployment.ps1` from the [frameType Solutions GitHub repository](https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneStarter).
+**Download** `alzPreDeployment.ps1` from the [frameType Solutions GitHub repository](https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneFoundation).
 
 The script:
 
@@ -555,7 +555,7 @@ For support, questions, or professional services engagements, contact [support@f
 | Marketplace managed applications | [https://learn.microsoft.com/en-us/azure/azure-resource-manager/managed-applications/overview](https://learn.microsoft.com/en-us/azure/azure-resource-manager/managed-applications/overview) |
 | Azure Pricing Calculator | [https://azure.microsoft.com/en-us/pricing/calculator/](https://azure.microsoft.com/en-us/pricing/calculator/) |
 | frameType Solutions product page | [https://frametypesolutions.com/marketplace/alz-foundation](https://frametypesolutions.com/marketplace/alz-foundation) |
-| frameType Solutions GitHub | [https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneStarter](https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneStarter) |
+| frameType Solutions GitHub | [https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneFoundation](https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneFoundation) |
 
 ---
 
@@ -607,7 +607,7 @@ Partner Center package version must match the version referenced in this README 
 
 ### Promotion Checklist
 
-Before committing to `msMarketplaceOffer-azureLandingZoneStarter`:
+Before committing to `msMarketplaceOffer-azureLandingZoneFoundation`:
 
 - [ ] Architecture diagram added at Section 4 (replace placeholder)
 - [ ] Marketplace listing URL confirmed live and correct
