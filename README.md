@@ -1,11 +1,3 @@
-<!--
-  WORKING COPY — msMarketplaceBuild-azureLandingZoneFoundation
-  This is the authoritative source for all README content.
-  Promote to: msMarketplaceOffer-azureLandingZoneFoundation/README.md
-  Strip before promotion: "Build Repo Conventions" section at the end of this file.
-  Last updated: 2026-05-31 | ALZ-BUILD-028
--->
-
 ---
 
 > **📦 Available on Microsoft Azure Marketplace**
@@ -16,7 +8,7 @@
 <!-- consumed-by: web | field: purpose -->
 ## 1. Purpose
 
-Forge LZ Starter delivers a production-grade, CAF-aligned Azure Landing Zone into a single Azure subscription through a single guided deployment experience. No scripting required beyond the included pre-deployment script. No post-deployment cleanup. Landing zone infrastructure ready on day one.
+Azure Landing Zone — Foundation delivers a production-grade, CAF-aligned Azure Landing Zone into a single Azure subscription through a single guided deployment experience. No scripting required beyond the included pre-deployment script. No post-deployment cleanup. Landing zone infrastructure ready on day one.
 
 **Six outcomes. One deployment.**
 
@@ -56,7 +48,7 @@ Forge LZ Starter delivers a production-grade, CAF-aligned Azure Landing Zone int
 **What this offer does not include:**
 
 - Management Group hierarchy — Tier 1 deploys into a single subscription; MG structure is a prerequisite, not deployed by this offer (see Prerequisites)
-- Azure Firewall — included in Forge LZ Connect (Tier 2)
+- Azure Firewall — included in Azure Landing Zone — Connected (Tier 2)
 - VPN Gateway or ExpressRoute Gateway — not deployed at Tier 1
 - Azure Bastion — not included; customers may add independently
 - Private DNS Zones — not deployed at Tier 1; added at Tier 2 with Private Endpoint integration
@@ -89,10 +81,9 @@ Forge LZ Starter delivers a production-grade, CAF-aligned Azure Landing Zone int
 
 ## 4. Overview
 
-> **Architecture diagram placeholder** — replace with final diagram before promotion to public repo.
-> File: `docs/architecture-alz-foundation.png`
+![Azure Landing Zone — Foundation Architecture](docs/images/png/alzFoundation-ArchitectureDiagram.png)
 
-Forge LZ Starter organizes landing zone resources across five resource groups. The hub-spoke networking topology isolates platform infrastructure from workloads while enabling peered connectivity. All platform resources route telemetry to a central Log Analytics Workspace from deployment.
+Azure Landing Zone — Foundation organizes landing zone resources across five resource groups. The hub-spoke networking topology isolates platform infrastructure from workloads while enabling peered connectivity. All platform resources route telemetry to a central Log Analytics Workspace from deployment.
 
 ### Deployment Layers
 
@@ -145,7 +136,7 @@ Microsoft Defender for Cloud is deployed at the tier selected in the guided depl
 
 ## 5. Azure Pricing
 
-Forge LZ Starter is a Marketplace managed application with a monthly subscription fee. Azure resource costs are billed directly to your subscription and are additional to the Marketplace fee.
+Azure Landing Zone — Foundation is a Marketplace managed application with a monthly subscription fee. Azure resource costs are billed directly to your subscription and are additional to the Marketplace fee.
 
 **Marketplace subscription fee:** $124/month — covers frameType Solutions managed service access (monitoring and JIT support via Lighthouse delegation).
 
@@ -266,7 +257,7 @@ Navigate to **Azure Portal → Resource groups**. Confirm all five resource grou
 
 **Step 2 — Verify Lighthouse delegation**
 
-Navigate to **Azure Portal → Azure Lighthouse → Service providers → Service provider offers**. The offer should appear as `Forge LZ — Foundation` with five active resource group delegations.
+Navigate to **Azure Portal → Azure Lighthouse → Service providers → Service provider offers**. The offer should appear as `frameType Solutions: ALZ Foundation — {workload}-{environment}` (where `{workload}` and `{environment}` match the values entered at deployment time) with five active resource group delegations.
 
 If delegations are missing after 30 minutes, check the `deploymentScript` resource in the managed resource group (`mrg-*`) under **Deployments** for errors. Contact [support@frametypesolutions.com](mailto:support@frametypesolutions.com) if errors persist.
 
@@ -302,7 +293,7 @@ Navigate to **Azure Portal → Cost Management → Budgets**. Confirm `budget-fo
 ## 9. Zero Trust Alignment
 
 <!-- consumed-by: web | field: zeroTrust -->
-Forge LZ Starter is designed around Microsoft's Zero Trust security principles. Every architectural decision maps to one or more of the three core principles: **Verify Explicitly**, **Use Least Privilege**, and **Assume Breach**.
+Azure Landing Zone — Foundation is designed around Microsoft's Zero Trust security principles. Every architectural decision maps to one or more of the three core principles: **Verify Explicitly**, **Use Least Privilege**, and **Assume Breach**.
 
 | Principle | Implementation |
 |---|---|
@@ -329,7 +320,7 @@ For Microsoft's Zero Trust reference architecture for Azure infrastructure, refe
 
 ## 10. Azure Governance
 
-Forge LZ Starter follows [CAF naming conventions](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming) and tagging practices across all deployed resources.
+Azure Landing Zone — Foundation follows [CAF naming conventions](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming) and tagging practices across all deployed resources.
 
 ### Tagging
 
@@ -438,7 +429,7 @@ All frameType Lighthouse access is scoped to the five operational resource group
 
 ## 13. Managed Service Access
 
-Forge LZ Starter includes Azure Lighthouse delegation to frameType Solutions as part of the offer. The monthly subscription fee of $124 covers this managed service access.
+Azure Landing Zone — Foundation includes Azure Lighthouse delegation to frameType Solutions as part of the offer. The monthly subscription fee of $124 covers this managed service access.
 
 ### Access Model
 
@@ -465,7 +456,7 @@ frameType has no access to the managed resource group (`mrg-*`) contents after d
 Lighthouse delegation is revocable at any time without impact to deployed resources. To remove a delegation:
 
 1. Navigate to **Azure Portal → Azure Lighthouse → Service providers → Service provider offers**
-2. Select the Forge LZ delegation
+2. Select the Azure Landing Zone — Foundation delegation
 3. Click **Delete** on the specific resource group delegation to revoke selectively, or delete all five to remove frameType access entirely
 
 Revoking Lighthouse delegation does not remove or affect any deployed resources. It only removes frameType's ability to view or access those resource groups.
@@ -514,13 +505,13 @@ Revoking Lighthouse delegation does not remove or affect any deployed resources.
 
 ## 15. Upgrade Path
 
-Forge LZ Starter is Tier 1 of a three-tier Azure Landing Zone suite. The hub-spoke topology, route table structure, and subnet layout are designed for forward compatibility at every tier.
+Azure Landing Zone — Foundation is Tier 1 of a three-tier Azure Landing Zone suite. The hub-spoke topology, route table structure, and subnet layout are designed for forward compatibility at every tier.
 
 | Tier | Offer | What it adds | Upgrade model |
 |---|---|---|---|
-| **Tier 1** | Forge LZ Starter *(this offer)* | Five resource groups, hub-spoke networking, governance, RBAC, Lighthouse, Defender for Cloud | Foundation — deploy first |
-| **Tier 2** | Forge LZ Connect *(coming soon)* | Azure Firewall, default route, Private DNS Zones, multi-subscription peering, VPN or ExpressRoute gateway options | Extends Tier 1 — no infrastructure replacement |
-| **Tier 3** | Forge LZ Enterprise *(coming soon)* | Management Group hierarchy, enterprise-scale governance, multiple landing zone subscriptions, Policy at MG scope | Extends Tier 2 — structural expansion |
+| **Tier 1** | Azure Landing Zone — Foundation *(this offer)* | Five resource groups, hub-spoke networking, governance, RBAC, Lighthouse, Defender for Cloud | Foundation — deploy first |
+| **Tier 2** | Azure Landing Zone — Connected *(coming soon)* | Azure Firewall, default route, Private DNS Zones, multi-subscription peering, VPN or ExpressRoute gateway options | Extends Tier 1 — no infrastructure replacement |
+| **Tier 3** | Azure Landing Zone — Enterprise *(coming soon)* | Management Group hierarchy, enterprise-scale governance, multiple landing zone subscriptions, Policy at MG scope | Extends Tier 2 — structural expansion |
 
 **No rebuilding required.** The route tables deployed at Tier 1 are pre-staged to receive the Azure Firewall default route at Tier 2. The `AzureFirewallSubnet` in the hub VNet is sized and ready. Tier 2 adds infrastructure; it does not replace what Tier 1 deployed.
 
@@ -530,7 +521,7 @@ Customers running Azure Firewall independently can engage frameType Solutions fo
 
 ## 16. Conclusion
 
-Forge LZ Starter delivers a complete, production-grade Azure Landing Zone foundation in a single guided deployment — CAF-aligned, Zero Trust by design, and built for forward compatibility with the Forge LZ suite. Five resource groups, hub-spoke networking, governance controls, and managed service access are all configured at deployment time, not as follow-on tasks.
+Azure Landing Zone — Foundation delivers a complete, production-grade Azure Landing Zone foundation in a single guided deployment — CAF-aligned, Zero Trust by design, and built for forward compatibility with the Azure Landing Zone suite. Five resource groups, hub-spoke networking, governance controls, and managed service access are all configured at deployment time, not as follow-on tasks.
 
 For support, questions, or professional services engagements, contact [support@frametypesolutions.com](mailto:support@frametypesolutions.com) or visit the [frameType Solutions product page](https://frametypesolutions.com/marketplace/alz-foundation).
 
@@ -559,60 +550,4 @@ For support, questions, or professional services engagements, contact [support@f
 
 ---
 
-Version 1.0 | frameType Solutions | May 2026
-
----
-
-<!--
-  ============================================================
-  BUILD REPO CONVENTIONS — INTERNAL ONLY
-  Strip this section before promoting to public offer repo.
-  ============================================================
--->
-
-## Build Repo Conventions
-
-> **Internal only.** This section is not promoted to the public offer repo.
-> Strip everything from this heading to the end of the file at the manual release gate.
-
-### Package Source Traceability
-
-| Artifact | Source | Notes |
-|---|---|---|
-| `mainTemplate.json` | Hand-authored ARM — not compiled from Bicep | Thin RG-scoped wrapper; `_artifactsLocation` + nested template pattern |
-| `subscriptionDeploy.json` | Compiled from `solutionDev-azureLandingZone/bicep/tiers/starter/main.bicep` then patched | Do not recompile from Bicep source without re-applying all patches (see HANDOFF.md Section 6) |
-| `createUiDefinition.json` | Hand-authored in this repo | Validate in portal sandbox before any change |
-| `alzPreDeployment.ps1` | Authored in this repo | Signed with `acs-frametypesol-prod-01`; re-sign after any change |
-
-### Known Post-Compile Patches — `subscriptionDeploy.json`
-
-All patches applied directly to `subscriptionDeploy.json`. Recompiling from Bicep requires re-applying all of the following:
-
-1. `deployment().location` → `parameters('location')` on subscription-scoped nested deployments
-2. Networking API version `2024-11-01` → `2024-10-01` (Key Vault stays at `2024-11-01`)
-3. ALZ-BUILD-019 race condition fix — `dependsOn` added to `hubPeering` and `spokePeering`
-4. ALZ-BUILD-021 Lighthouse activation — `deploy-lighthouse` + 5x `deploy-lighthouseAssignment-*` deployments added
-
-### Package Build Command
-
-```powershell
-# From repo root — produces alzfoundation-v{version}.zip
-Compress-Archive -Path mainTemplate.json, createUiDefinition.json, nestedtemplates, preDeploymentScripts `
-                 -DestinationPath alzfoundation-v2.2.0.zip -Force
-```
-
-### Version Alignment
-
-Partner Center package version must match the version referenced in this README and HANDOFF.md. Current version: `2.2.0`.
-
-### Promotion Checklist
-
-Before committing to `msMarketplaceOffer-azureLandingZoneFoundation`:
-
-- [ ] Architecture diagram added at Section 4 (replace placeholder)
-- [ ] Marketplace listing URL confirmed live and correct
-- [ ] GitHub repository URL confirmed correct
-- [ ] Product page URL confirmed live (`frametypesolutions.com/marketplace/alz-foundation`)
-- [ ] This Build Repo Conventions section removed in its entirety
-- [ ] Working copy banner at top of file removed
-- [ ] Version footer updated to match release version and date
+Version 1.0 | frameType Solutions | June 2026
