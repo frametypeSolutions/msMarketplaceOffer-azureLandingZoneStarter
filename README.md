@@ -1,5 +1,3 @@
----
-
 > **📦 Available on Microsoft Azure Marketplace**
 > [Deploy Azure Landing Zone — Foundation](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/frametypesolutions.azurelandingzone)
 
