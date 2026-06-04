@@ -1,5 +1,5 @@
 > **📦 Available on Microsoft Azure Marketplace**
-> [Deploy Azure Landing Zone — Foundation](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/frametypesolutions.azurelandingzone)
+> [Deploy Azure Landing Zone — Foundation](https://marketplace.microsoft.com/en-us/product/frametype.alz-foundation)
 
 ---
 
@@ -215,7 +215,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ### Step 2 — Deploy from Azure Marketplace
 
-1. Navigate to the [Deploy Azure Landing Zone — Foundation](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/frametypesolutions.azurelandingzone) listing on Azure Marketplace
+1. Navigate to the [Deploy Azure Landing Zone — Foundation](https://marketplace.microsoft.com/en-us/product/frametype.alz-foundation) listing on Azure Marketplace
 2. Click **Get it now** and select the **Azure Landing Zone — Foundation** plan
 3. Complete the guided deployment experience:
 
@@ -544,6 +544,7 @@ For support, questions, or professional services engagements, contact [support@f
 | Marketplace managed applications | [https://learn.microsoft.com/en-us/azure/azure-resource-manager/managed-applications/overview](https://learn.microsoft.com/en-us/azure/azure-resource-manager/managed-applications/overview) |
 | Azure Pricing Calculator | [https://azure.microsoft.com/en-us/pricing/calculator/](https://azure.microsoft.com/en-us/pricing/calculator/) |
 | frameType Solutions product page | [https://frametypesolutions.com/marketplace/alz-foundation](https://frametypesolutions.com/marketplace/alz-foundation) |
+| Azure Marketplace listing | [https://marketplace.microsoft.com/en-us/product/frametype.alz-foundation](https://marketplace.microsoft.com/en-us/product/frametype.alz-foundation) |
 | frameType Solutions GitHub | [https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneFoundation](https://github.com/frametypeSolutions/msMarketplaceOffer-azureLandingZoneFoundation) |
 
 ---
